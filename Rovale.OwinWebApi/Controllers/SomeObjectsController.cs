@@ -19,5 +19,18 @@ namespace Rovale.OwinWebApi.Controllers
         {
             return _someObjectsProvider.GetAll();
         }
+
+        [Route("api/someObjects/{id}")]
+        public IHttpActionResult Get(int id)
+        {
+            var someObject = _someObjectsProvider.Find(id);
+
+            if (someObject == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(someObject);
+        }
     }
 }

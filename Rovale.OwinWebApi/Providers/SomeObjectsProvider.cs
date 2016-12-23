@@ -1,13 +1,26 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Rovale.OwinWebApi.Models;
 
 namespace Rovale.OwinWebApi.Providers
 {
     public class SomeObjectsProvider : ISomeObjectsProvider
     {
+        private readonly List<SomeObject> _someObjects = new List<SomeObject>();
+
         public IEnumerable<SomeObject> GetAll()
         {
-            return new [] { new SomeObject {SomeText = "Some text 1"}, new SomeObject { SomeText = "Some text 2" } };
+            return _someObjects;
+        }
+
+        public SomeObject Find(int id)
+        {
+            return _someObjects.SingleOrDefault(o => o.Id == id);
+        }
+
+        public void Add(SomeObject someObject)
+        {
+            _someObjects.Add(someObject);
         }
     }
 }
