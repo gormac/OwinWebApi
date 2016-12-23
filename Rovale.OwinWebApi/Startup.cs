@@ -3,9 +3,11 @@ using System.Web.Http;
 using Autofac;
 using Autofac.Integration.WebApi;
 using Microsoft.Owin;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Owin;
 using Rovale.OwinWebApi;
-using Rovale.OwinWebApi.Controllers;
+using Rovale.OwinWebApi.Providers;
 
 [assembly: OwinStartup(typeof(Startup))]
 
@@ -19,14 +21,14 @@ namespace Rovale.OwinWebApi
         {
             var builder = new ContainerBuilder();
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
-            builder.Register(c => new ValuesProvider()).As<IValuesProvider>();
+            builder.Register(c => new SomeObjectsProvider()).As<ISomeObjectsProvider>();
             _container = builder.Build();
         }
 
-        public Startup Using(IValuesProvider valuesProvider)
+        public Startup Using(ISomeObjectsProvider someObjectsProvider)
         {
             var builder = new ContainerBuilder();
-            builder.RegisterInstance(valuesProvider).As<IValuesProvider>();
+            builder.RegisterInstance(someObjectsProvider).As<ISomeObjectsProvider>();
             builder.Update(_container);
             return this;
         }
@@ -34,7 +36,14 @@ namespace Rovale.OwinWebApi
         public void Configuration(IAppBuilder app)
         {
             var config = new HttpConfiguration();
+
             config.MapHttpAttributeRoutes();
+
+            config.Formatters.JsonFormatter.SerializerSettings =
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
 
             config.DependencyResolver = new AutofacWebApiDependencyResolver(_container);
 

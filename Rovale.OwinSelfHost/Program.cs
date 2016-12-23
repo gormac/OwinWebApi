@@ -18,16 +18,16 @@ namespace Rovale.OwinSelfHost
                 // Web API service. You should see logging statements and results
                 // dumped to the console window.
                 var client = new HttpClient();
-                var response = client.GetAsync(baseAddress + "api/values").Result;
+                var response = client.GetAsync(baseAddress + "api/someObjects").Result;
 
                 Console.WriteLine(response);
                 Console.WriteLine(response.Content.ReadAsStringAsync().Result);
-            }
 
-            if (Debugger.IsAttached)
-            {
-                Console.WriteLine("Press any key to exit.");
-                Console.ReadLine();
+                if (Debugger.IsAttached)
+                {
+                    Console.WriteLine("Press any key to exit.");
+                    Console.ReadLine();
+                }
             }
         }
     }
