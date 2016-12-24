@@ -5,6 +5,7 @@ using Rovale.OwinWebApi.Providers;
 
 namespace Rovale.OwinWebApi.Controllers
 {
+    [Route("api/someObjects")]
     public class SomeObjectsController : ApiController
     {
         private readonly ISomeObjectsProvider _someObjectsProvider;
@@ -14,13 +15,12 @@ namespace Rovale.OwinWebApi.Controllers
             _someObjectsProvider = someObjectsProvider;
         }
 
-        [Route("api/someObjects")]
         public IEnumerable<SomeObject> Get()
         {
             return _someObjectsProvider.GetAll();
         }
 
-        [Route("api/someObjects/{id}")]
+        [Route("api/someObjects/{id}", Name = "getById")]
         public IHttpActionResult Get(int id)
         {
             var someObject = _someObjectsProvider.Find(id);
@@ -31,6 +31,29 @@ namespace Rovale.OwinWebApi.Controllers
             }
 
             return Ok(someObject);
+        }
+
+        [HttpPost]
+        public IHttpActionResult Post([FromBody] SomeObject someObject)
+        {
+            if (someObject == null)
+            {
+                return BadRequest("Invalid passed data");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (_someObjectsProvider.Find(someObject.Id) != null)
+            {
+                return Conflict();
+            }
+
+            _someObjectsProvider.Add(someObject);
+
+            return CreatedAtRoute("getById", new { id = someObject.Id }, someObject);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Rovale.OwinWebApi
         {
             var builder = new ContainerBuilder();
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
-            builder.Register(c => new SomeObjectsProvider()).As<ISomeObjectsProvider>();
+            builder.Register(c => new SomeObjectsProvider()).As<ISomeObjectsProvider>().SingleInstance();
             _container = builder.Build();
         }
 
