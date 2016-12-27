@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using FluentAssertions;
@@ -11,6 +13,28 @@ namespace Rovale.OwinWebApi.Test
 {
     public class SomeObjectsControllerTest
     {
+        [Fact]
+        public async void WhenGettingJsonItShouldBeCamelCased()
+        {
+            var someObjectsProvider = new SomeObjectsProvider();
+            someObjectsProvider.Add(new SomeObject { Id = 1, SomeText = "Some test text 1" });
+
+            using (var server = TestServer.Create(appBuilder =>
+            {
+                new Startup()
+                    .Using(someObjectsProvider)
+                    .Configuration(appBuilder);
+            }
+            ))
+            {
+                HttpResponseMessage response = await server.HttpClient.GetAsync("/api/someObjects");
+                string result = await response.Content.ReadAsStringAsync();
+
+                response.StatusCode.Should().Be(HttpStatusCode.OK);
+                result.Should().Be("[{\"id\":1,\"someText\":\"Some test text 1\"}]");
+            }
+        }
+
         [Fact]
         public async void WhenGettingAllItShouldReturnThem()
         {
@@ -27,13 +51,11 @@ namespace Rovale.OwinWebApi.Test
             ))
             {
                 HttpResponseMessage response = await server.HttpClient.GetAsync("/api/someObjects");
-                string result = await response.Content.ReadAsStringAsync();
+                IEnumerable<SomeObject> result = (await response.Content.ReadAsAsync<IEnumerable<SomeObject>>()).ToArray();
 
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
-                result.Should().Be("[" +
-                             "{\"id\":1,\"someText\":\"Some test text 1\"}," +
-                             "{\"id\":2,\"someText\":\"Some test text 2\"}" +
-                             "]");
+                result.Should().HaveCount(2);
+                result.ShouldAllBeEquivalentTo(someObjectsProvider.GetAll());
             }
         }
 
@@ -41,8 +63,11 @@ namespace Rovale.OwinWebApi.Test
         public async void WhenGettingASingleItemItShouldReturnIt()
         {
             var someObjectsProvider = new SomeObjectsProvider();
-            someObjectsProvider.Add(new SomeObject { Id = 1, SomeText = "Some test text 1" });
-            someObjectsProvider.Add(new SomeObject { Id = 2, SomeText = "Some test text 2" });
+            var someObject1 = new SomeObject { Id = 1, SomeText = "Some test text 1" };
+            var someObject2 = new SomeObject { Id = 2, SomeText = "Some test text 2" };
+
+            someObjectsProvider.Add(someObject1);
+            someObjectsProvider.Add(someObject2);
 
             using (var server = TestServer.Create(appBuilder =>
             {
@@ -53,10 +78,10 @@ namespace Rovale.OwinWebApi.Test
             ))
             {
                 HttpResponseMessage response = await server.HttpClient.GetAsync("/api/someObjects/2");
-                string result = await response.Content.ReadAsStringAsync();
+                SomeObject result = await response.Content.ReadAsAsync<SomeObject>();
 
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
-                result.Should().Be("{\"id\":2,\"someText\":\"Some test text 2\"}");
+                result.ShouldBeEquivalentTo(someObject2);
             }
         }
 
@@ -81,8 +106,8 @@ namespace Rovale.OwinWebApi.Test
                     SomeText = "Some text"
                 };
 
-                var content = new ObjectContent<SomeObject>(someObject, new JsonMediaTypeFormatter());
-                HttpResponseMessage response = await server.HttpClient.PostAsync("/api/someObjects", content);
+                HttpResponseMessage response = await server.HttpClient.PostAsync("/api/someObjects", someObject,
+                    new JsonMediaTypeFormatter());
 
                 response.StatusCode.Should().Be(HttpStatusCode.Created);
                 response.Headers.Location.AbsolutePath.Should().Be("/api/someObjects/1");
@@ -100,8 +125,8 @@ namespace Rovale.OwinWebApi.Test
                     SomeText = "123456789012345678901234567890X"
                 };
 
-                var content = new ObjectContent<SomeObject>(someObject, new JsonMediaTypeFormatter());
-                HttpResponseMessage response = await server.HttpClient.PostAsync("/api/someObjects", content);
+                HttpResponseMessage response = await server.HttpClient.PostAsync("/api/someObjects", someObject,
+                    new JsonMediaTypeFormatter());
 
                 response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
                 string result = await response.Content.ReadAsStringAsync();
@@ -121,11 +146,10 @@ namespace Rovale.OwinWebApi.Test
                     SomeText = "Some text"
                 };
 
-                await server.HttpClient.PostAsync("/api/someObjects",
-                    new ObjectContent<SomeObject>(someObject, new JsonMediaTypeFormatter()));
+                await server.HttpClient.PostAsync("/api/someObjects", someObject, new JsonMediaTypeFormatter());
 
-                HttpResponseMessage response = await server.HttpClient.PostAsync("/api/someObjects",
-                    new ObjectContent<SomeObject>(someObject, new JsonMediaTypeFormatter()));
+                HttpResponseMessage response = await server.HttpClient.PostAsync("/api/someObjects", someObject,
+                    new JsonMediaTypeFormatter());
 
                 response.StatusCode.Should().Be(HttpStatusCode.Conflict);
             }
@@ -156,7 +180,7 @@ namespace Rovale.OwinWebApi.Test
         {
             using (var server = TestServer.Create<Startup>())
             {
-                HttpResponseMessage response = await server.HttpClient.DeleteAsync("/api/someObjects/1");
+                HttpResponseMessage response = await server.HttpClient.DeleteAsync("/api/someObjects/1234");
                 response.StatusCode.Should().Be(HttpStatusCode.NotFound);
             }
         }

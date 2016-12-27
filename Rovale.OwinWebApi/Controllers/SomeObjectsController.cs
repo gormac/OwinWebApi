@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
-using System.Web.Http.Results;
 using Rovale.OwinWebApi.Models;
 using Rovale.OwinWebApi.Providers;
 
