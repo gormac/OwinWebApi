@@ -8,5 +8,6 @@ namespace Rovale.OwinWebApi.Providers
         IEnumerable<SomeObject> GetAll();
         SomeObject Find(int id);
         void Add(SomeObject someObject);
+        void Delete(SomeObject someObject);
     }
 }

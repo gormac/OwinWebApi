@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Web.Http;
+using System.Web.Http.Results;
 using Rovale.OwinWebApi.Models;
 using Rovale.OwinWebApi.Providers;
 
@@ -54,6 +56,22 @@ namespace Rovale.OwinWebApi.Controllers
             _someObjectsProvider.Add(someObject);
 
             return CreatedAtRoute("getById", new { id = someObject.Id }, someObject);
+        }
+
+        [HttpDelete]
+        [Route("api/someObjects/{id}")]
+        public IHttpActionResult Delete(int id)
+        {
+            var someObject = _someObjectsProvider.Find(id);
+
+            if (someObject == null)
+            {
+                return NotFound();
+            }
+
+            _someObjectsProvider.Delete(someObject);
+
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

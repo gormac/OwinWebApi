@@ -61,7 +61,7 @@ namespace Rovale.OwinWebApi.Test
         }
 
         [Fact]
-        public async void WhenAnItemIsNotFoundItShouldFail()
+        public async void WhenGettingANonExistingItemItShouldFail()
         {
             using (var server = TestServer.Create<Startup>())
             {
@@ -128,6 +128,36 @@ namespace Rovale.OwinWebApi.Test
                     new ObjectContent<SomeObject>(someObject, new JsonMediaTypeFormatter()));
 
                 response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+            }
+        }
+
+        [Fact]
+        public async void WhenDeletingAnExistingItemItShouldSucceed()
+        {
+            var someObjectsProvider = new SomeObjectsProvider();
+            someObjectsProvider.Add(new SomeObject { Id = 1, SomeText = "Some test text 1" });
+
+            using (var server = TestServer.Create(appBuilder =>
+            {
+                new Startup()
+                    .Using(someObjectsProvider)
+                    .Configuration(appBuilder);
+            }
+            ))
+            {
+                HttpResponseMessage response = await server.HttpClient.DeleteAsync("/api/someObjects/1");
+                response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+                someObjectsProvider.GetAll().Should().HaveCount(0, "the item should be deleted");
+            }
+        }
+
+        [Fact]
+        public async void WhenDeletingANonExistingItemItShouldFail()
+        {
+            using (var server = TestServer.Create<Startup>())
+            {
+                HttpResponseMessage response = await server.HttpClient.DeleteAsync("/api/someObjects/1");
+                response.StatusCode.Should().Be(HttpStatusCode.NotFound);
             }
         }
     }

@@ -22,5 +22,10 @@ namespace Rovale.OwinWebApi.Providers
         {
             _someObjects.Add(someObject);
         }
+
+        public void Delete(SomeObject someObject)
+        {
+            _someObjects.Remove(someObject);
+        }
     }
 }
