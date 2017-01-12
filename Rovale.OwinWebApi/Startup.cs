@@ -2,14 +2,10 @@
 using System.Web.Http;
 using Autofac;
 using Autofac.Integration.WebApi;
-using Microsoft.Owin;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Owin;
-using Rovale.OwinWebApi;
 using Rovale.OwinWebApi.Providers;
-
-[assembly: OwinStartup(typeof(Startup))]
 
 namespace Rovale.OwinWebApi
 {
