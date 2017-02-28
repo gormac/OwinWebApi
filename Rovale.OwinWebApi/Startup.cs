@@ -17,14 +17,14 @@ namespace Rovale.OwinWebApi
         {
             var builder = new ContainerBuilder();
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
-            builder.Register(c => new SomeObjectsProvider()).As<ISomeObjectsProvider>().SingleInstance();
+            builder.Register(c => new TodoListProvider()).As<ITodoListProvider>().SingleInstance();
             _container = builder.Build();
         }
 
-        public Startup Using(ISomeObjectsProvider someObjectsProvider)
+        public Startup Using(ITodoListProvider todoListProvider)
         {
             var builder = new ContainerBuilder();
-            builder.RegisterInstance(someObjectsProvider).As<ISomeObjectsProvider>();
+            builder.RegisterInstance(todoListProvider).As<ITodoListProvider>();
             builder.Update(_container);
             return this;
         }

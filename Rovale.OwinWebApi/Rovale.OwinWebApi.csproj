@@ -81,10 +81,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\SomeObject.cs" />
-    <Compile Include="Providers\ISomeObjectsProvider.cs" />
-    <Compile Include="Controllers\SomeObjectsController.cs" />
-    <Compile Include="Providers\SomeObjectsProvider.cs" />
+    <Compile Include="Models\TodoList.cs" />
+    <Compile Include="Providers\ITodoListProvider.cs" />
+    <Compile Include="Controllers\TodoListController.cs" />
+    <Compile Include="Providers\TodoListProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
